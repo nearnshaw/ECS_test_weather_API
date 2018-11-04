@@ -40,6 +40,7 @@ define("game", ["require", "exports"], function (require, exports) {
     var rainSpeed = 4;
     var snowSpeed = 1;
     ////////////////////////////////
+    // CUSTOM TYPES
     var callUrl = 'http://api.weatherunlocked.com/api/current/' + lat + ',%20' + lon + '?app_id=' + appId + '&app_key=' + APIkey;
     var Weather;
     (function (Weather) {
@@ -55,6 +56,8 @@ define("game", ["require", "exports"], function (require, exports) {
         PrecipType[PrecipType["drop"] = 0] = "drop";
         PrecipType[PrecipType["flake"] = 1] = "flake";
     })(PrecipType = exports.PrecipType || (exports.PrecipType = {}));
+    ////////////////////////
+    // CUSTOM COMPONENTS
     var NextPos = /** @class */ (function () {
         function NextPos(nextPos) {
             if (nextPos === void 0) { nextPos = Vector3.Zero(); }
@@ -111,8 +114,24 @@ define("game", ["require", "exports"], function (require, exports) {
         return SpinVel;
     }());
     exports.SpinVel = SpinVel;
+    var LightningTimer = /** @class */ (function () {
+        function LightningTimer(count) {
+            if (count === void 0) { count = 10; }
+            this.count = count;
+        }
+        LightningTimer = __decorate([
+            Component('lightningTimer'),
+            __metadata("design:paramtypes", [Number])
+        ], LightningTimer);
+        return LightningTimer;
+    }());
+    exports.LightningTimer = LightningTimer;
+    //////////////////////////
+    // ENTITY LISTS
     var drops = engine.getComponentGroup(Transform, IsPrecip);
     var flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel);
+    ///////////////////////////
+    // FUNCTIONS EXECUTED WHEN CLICKING CUBE
     // API calls not supported for now, here we're only using `fakeWeather`
     function getWeather() {
         var weather = Weather.sun;
@@ -276,6 +295,21 @@ define("game", ["require", "exports"], function (require, exports) {
         function LightningSystem() {
         }
         LightningSystem.prototype.update = function () {
+            var timer = lightning.get(LightningTimer);
+            timer.count -= 1;
+            //log("timer " + timer.count)
+            if (timer.count < 0) {
+                var lightningNum = Math.floor(Math.random() * 25) + 1;
+                if (lightningNum > 6) {
+                    if (lightning.has(GLTFShape)) {
+                        lightning.remove(GLTFShape);
+                        timer.count = Math.random() * 20;
+                        return;
+                    }
+                }
+                lightning.set(lightningModels[lightningNum]);
+                timer.count = Math.random() * 10;
+            }
         };
         return LightningSystem;
     }());
@@ -397,4 +431,11 @@ define("game", ["require", "exports"], function (require, exports) {
         var lnModel = new GLTFShape(modelPath);
         lightningModels.push(lnModel);
     }
+    // ADD LIGHTNING ENTITY
+    var lightning = new Entity();
+    lightning.set(new Transform());
+    lightning.get(Transform).position.set(5, 10, 5);
+    lightning.get(Transform).scale.setAll(5);
+    lightning.set(new LightningTimer(30));
+    engine.addEntity(lightning);
 });

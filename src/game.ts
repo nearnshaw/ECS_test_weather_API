@@ -20,6 +20,7 @@ const rainSpeed = 4
 const snowSpeed = 1
 
 ////////////////////////////////
+// CUSTOM TYPES
 
 const callUrl: string =
   'http://api.weatherunlocked.com/api/current/' + lat + ',%20' + lon + '?app_id=' + appId + '&app_key=' + APIkey
@@ -38,6 +39,8 @@ export enum PrecipType {
   flake
 }
 
+////////////////////////
+// CUSTOM COMPONENTS
 
 @Component('nextPos')
 export class NextPos {
@@ -79,8 +82,22 @@ export class SpinVel{
   }  
 }
 
+@Component('lightningTimer')
+export class LightningTimer{
+  count: number
+  constructor(count: number = 10){
+    this.count = count
+  }   
+}
+
+//////////////////////////
+// ENTITY LISTS
+
 const drops = engine.getComponentGroup(Transform, IsPrecip)
 const flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel)
+
+///////////////////////////
+// FUNCTIONS EXECUTED WHEN CLICKING CUBE
 
 // API calls not supported for now, here we're only using `fakeWeather`
 function getWeather() {
@@ -216,7 +233,24 @@ export class RotateSystem {
 
 export class LightningSystem {
   update() {
-   
+    let timer = lightning.get(LightningTimer)
+    timer.count -= 1
+    //log("timer " + timer.count)
+    if (timer.count < 0)
+    {
+      let lightningNum: number = Math.floor(Math.random() * 25) + 1
+      if (lightningNum > 6) {
+        if (lightning.has(GLTFShape)){
+          lightning.remove(GLTFShape)
+          timer.count = Math.random() * 20
+          return
+        }      
+      }
+      
+      lightning.set(lightningModels[lightningNum])
+      timer.count = Math.random() * 10
+      
+    }
   }
 }
 
@@ -373,3 +407,11 @@ for (let i = 1; i < 6; i ++)
   const lnModel = new GLTFShape(modelPath)
   lightningModels.push(lnModel)
 }
+
+// ADD LIGHTNING ENTITY
+const lightning = new Entity()
+lightning.set(new Transform())
+lightning.get(Transform).position.set(5, 10, 5)
+lightning.get(Transform).scale.setAll(5)
+lightning.set(new LightningTimer(30))
+engine.addEntity(lightning)
