@@ -30,7 +30,7 @@ define("game", ["require", "exports"], function (require, exports) {
     var APIkey = '2e55a43d3e62d76f145f28aa7e3990e9';
     var lat = '-34.55';
     var lon = '-58.46';
-    var fakeWeather = 'heavy rain';
+    var fakeWeather = 'snow';
     var rainSpeed = 4;
     var snowSpeed = 1;
     ////////////////////////////////
@@ -106,7 +106,7 @@ define("game", ["require", "exports"], function (require, exports) {
     }());
     exports.SpinVel = SpinVel;
     var drops = engine.getComponentGroup(Transform, IsPrecip);
-    var flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel);
+    var flakes = engine.getComponentGroup(Transform, SpinVel);
     // API calls not supported for now, here we're only using `fakeWeather`
     function getWeather() {
         var weather = Weather.sun;
@@ -252,11 +252,7 @@ define("game", ["require", "exports"], function (require, exports) {
                 for (var _b = __values(flakes.entities), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var flake = _c.value;
                     var vel = flake.get(SpinVel).vel;
-                    var rotation = flake.get(Transform).rotation;
-                    rotation.add(vel);
-                    //rotation.x =+ vel.x
-                    //rotation.y =+ vel.y
-                    //rotation.z =+ vel.z
+                    flake.get(Transform).rotation.add(vel);
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -307,16 +303,16 @@ define("game", ["require", "exports"], function (require, exports) {
         flake.get(Transform).scale.setAll(0.3);
         //flake.set(new PlaneShape())
         flake.set(new SpinVel());
-        flake.get(SpinVel).vel.x = Math.random() * 10;
-        flake.get(SpinVel).vel.y = Math.random() * 10;
-        flake.get(SpinVel).vel.z = Math.random() * 10;
+        flake.get(SpinVel).vel.x = Math.random() * 30;
+        flake.get(SpinVel).vel.y = Math.random() * 30;
+        flake.get(SpinVel).vel.z = Math.random() * 30;
         flake.set(new PlaneShape());
-        flake.get(PlaneShape).uvs = [0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1, 0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1];
         var materialIndex = Math.floor(Math.random() * 15);
         flake.set(flakeMaterial[materialIndex]);
         engine.addEntity(flake);
     }
     engine.addSystem(new FallSystem());
+    engine.addSystem(new RotateSystem());
     engine.addSystem(new SpawnSystem());
     // DEFINE MATERIALS
     var dropMaterial = new BasicMaterial();

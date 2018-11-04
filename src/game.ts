@@ -5,7 +5,7 @@ const APIkey: string = '2e55a43d3e62d76f145f28aa7e3990e9'
 const lat: string = '-34.55'
 const lon: string = '-58.46'
 
-let fakeWeather: string | null = 'heavy rain'
+let fakeWeather: string | null = 'snow'
 
 const rainSpeed = 4
 const snowSpeed = 1
@@ -71,7 +71,7 @@ export class SpinVel{
 }
 
 const drops = engine.getComponentGroup(Transform, IsPrecip)
-const flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel)
+const flakes = engine.getComponentGroup(Transform, SpinVel)
 
 // API calls not supported for now, here we're only using `fakeWeather`
 function getWeather() {
@@ -201,11 +201,7 @@ export class RotateSystem {
   update(dt: number) {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
-      let rotation = flake.get(Transform).rotation
-      rotation.add(vel)
-      //rotation.x =+ vel.x
-      //rotation.y =+ vel.y
-      //rotation.z =+ vel.z
+      flake.get(Transform).rotation.add(vel)
     }
   }
 }
@@ -263,13 +259,12 @@ function spawnSnow() {
 
   //flake.set(new PlaneShape())
   flake.set(new SpinVel())
-  flake.get(SpinVel).vel.x = Math.random() * 10
-  flake.get(SpinVel).vel.y = Math.random() * 10
-  flake.get(SpinVel).vel.z = Math.random() * 10
+  flake.get(SpinVel).vel.x = Math.random() * 30
+  flake.get(SpinVel).vel.y = Math.random() * 30
+  flake.get(SpinVel).vel.z = Math.random() * 30
 
   flake.set(new PlaneShape())
-  flake.get(PlaneShape).uvs = [0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1, 0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1]
-
+ 
   let materialIndex = Math.floor(Math.random() * 15)
   flake.set(flakeMaterial[materialIndex])
 
@@ -277,6 +272,7 @@ function spawnSnow() {
 }
 
 engine.addSystem(new FallSystem())
+engine.addSystem(new RotateSystem())
 engine.addSystem(new SpawnSystem())
 
 
