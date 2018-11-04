@@ -1,7 +1,7 @@
 //// VALUES TO CONFIGURE ////////
 
-
-// TRY THE FOLLOWING VALUES
+// fakeWeather CONTROLS WHAT WEATHER CONDITION TO SHOW IN THE SCENE
+// TRY THE FOLLOWING VALUES:
 // `snow`
 // `heavy rain`
 // `light rain`
@@ -9,7 +9,9 @@
 // `cloudy`
 let fakeWeather: string | null = 'thunder'
 
+//////////////////////////////
 
+// THESE VALUES WILL BE USEFUL WHEN HITTING THE WEATHER API (NOT CURRENTLY SUPPORTED)
 
 const appId: string = 'bb6063b3'
 const APIkey: string = '2e55a43d3e62d76f145f28aa7e3990e9'
@@ -174,6 +176,10 @@ function startPrecipitation() {
 }
 
 
+///////////////////
+// SYSTEMS (EXECUTE update() ON EACH FRAME)
+
+
 export class SpawnSystem {
   update(dt: number) {
       const weather = weatherObject.get(CurrentWeather)
@@ -254,33 +260,10 @@ export class LightningSystem {
   }
 }
 
-const weatherObject = new Entity()
-weatherObject.set(new CurrentWeather())
-engine.addEntity(weatherObject)
-
-const buttonMaterial = new Material()
-buttonMaterial.albedoColor = '#FF0000'
-buttonMaterial.metallic = 0.9
-buttonMaterial.roughness = 0.1
+/////////////////
 
 
-const makeItRain = new Entity()
-
-makeItRain.set(new Transform())
-makeItRain.get(Transform).position.set(1, 1, 1,)
-makeItRain.set(new BoxShape())
-makeItRain.set(buttonMaterial)
-
-makeItRain.set(
-  new OnClick(_ => {
-    getWeather()
-    setHouse()
-    setClouds()
-    log('clicked')
-  })
-)
-
-engine.addEntity(makeItRain)
+// CREATE NEW RAINDROPS
 
 function spawnRain() {
   const drop = new Entity()
@@ -295,6 +278,7 @@ function spawnRain() {
   engine.addEntity(drop)
 }
 
+// CREATE NEW SNOWFLAKES
 
 function spawnSnow() {
   const flake = new Entity()
@@ -316,16 +300,47 @@ function spawnSnow() {
   engine.addEntity(flake)
 }
 
-engine.addSystem(new FallSystem())
-engine.addSystem(new RotateSystem())
-engine.addSystem(new SpawnSystem())
-engine.addSystem(new LightningSystem())
+// SCENE FIXED ENTITIES
+
+// WEATHER CONTROLLER SINGLETON 
+
+const weatherObject = new Entity()
+weatherObject.set(new CurrentWeather())
+engine.addEntity(weatherObject)
+
+// BUTTON TO TRIGGER WEATHER
+
+const buttonMaterial = new Material()
+buttonMaterial.albedoColor = '#FF0000'
+buttonMaterial.metallic = 0.9
+buttonMaterial.roughness = 0.1
+
+const makeItRain = new Entity()
+
+makeItRain.set(new Transform())
+makeItRain.get(Transform).position.set(1, 1, 1,)
+makeItRain.set(new BoxShape())
+makeItRain.set(buttonMaterial)
+
+makeItRain.set(
+  new OnClick(_ => {
+    getWeather()
+    setHouse()
+    setClouds()
+    log('clicked')
+  })
+)
+
+engine.addEntity(makeItRain)
 
 
-// DEFINE MATERIALS
+// DEFINE DROP MATERIALS
+
 const dropMaterial = new BasicMaterial()
 dropMaterial.texture = 'materials/drop.png'
 dropMaterial.samplingMode = 0
+
+// DEFINE FLAKE MATERIALS AS AN ARRAY OF BASICMATERIAL COMPONENTS
 
 const flakeMaterial: BasicMaterial[] = []
 for (let i = 1; i < 15; i ++)
@@ -372,6 +387,8 @@ clouds.set(new Transform())
 clouds.get(Transform).position.set(5, 10, 5)
 clouds.get(Transform).scale.setAll(5)
 
+engine.addEntity(clouds)
+
 function setClouds(){
   let weather = weatherObject.get(CurrentWeather)
   switch (weather.weather) {
@@ -396,9 +413,7 @@ function setClouds(){
   }
 }
 
-engine.addEntity(clouds)
-
-// DEFINE LIGHTNING COMPONENTS - ONE FOR EACH MODEL
+// DEFINE LIGHTNING COMPONENTS AS AN ARRAY OF GLTF COMPONENTS
 
 const lightningModels: GLTFShape[] = []
 for (let i = 1; i < 6; i ++)
@@ -415,3 +430,10 @@ lightning.get(Transform).position.set(5, 10, 5)
 lightning.get(Transform).scale.setAll(5)
 lightning.set(new LightningTimer(30))
 engine.addEntity(lightning)
+
+// ADD SYSTEMS
+
+engine.addSystem(new FallSystem())
+engine.addSystem(new RotateSystem())
+engine.addSystem(new SpawnSystem())
+engine.addSystem(new LightningSystem())
