@@ -26,11 +26,17 @@ var __values = (this && this.__values) || function (o) {
 define("game", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    // TRY THE FOLLOWING VALUES
+    // `snow`
+    // `heavy rain`
+    // `light rain`
+    // `thunder`
+    // `cloudy`
+    var fakeWeather = 'thunder';
     var appId = 'bb6063b3';
     var APIkey = '2e55a43d3e62d76f145f28aa7e3990e9';
     var lat = '-34.55';
     var lon = '-58.46';
-    var fakeWeather = 'snow';
     var rainSpeed = 4;
     var snowSpeed = 1;
     ////////////////////////////////
@@ -106,7 +112,7 @@ define("game", ["require", "exports"], function (require, exports) {
     }());
     exports.SpinVel = SpinVel;
     var drops = engine.getComponentGroup(Transform, IsPrecip);
-    var flakes = engine.getComponentGroup(Transform, SpinVel);
+    var flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel);
     // API calls not supported for now, here we're only using `fakeWeather`
     function getWeather() {
         var weather = Weather.sun;
@@ -266,6 +272,14 @@ define("game", ["require", "exports"], function (require, exports) {
         return RotateSystem;
     }());
     exports.RotateSystem = RotateSystem;
+    var LightningSystem = /** @class */ (function () {
+        function LightningSystem() {
+        }
+        LightningSystem.prototype.update = function () {
+        };
+        return LightningSystem;
+    }());
+    exports.LightningSystem = LightningSystem;
     var weatherObject = new Entity();
     weatherObject.set(new CurrentWeather());
     engine.addEntity(weatherObject);
@@ -281,6 +295,7 @@ define("game", ["require", "exports"], function (require, exports) {
     makeItRain.set(new OnClick(function (_) {
         getWeather();
         setHouse();
+        setClouds();
         log('clicked');
     }));
     engine.addEntity(makeItRain);
@@ -311,6 +326,7 @@ define("game", ["require", "exports"], function (require, exports) {
     engine.addSystem(new FallSystem());
     engine.addSystem(new RotateSystem());
     engine.addSystem(new SpawnSystem());
+    engine.addSystem(new LightningSystem());
     // DEFINE MATERIALS
     var dropMaterial = new BasicMaterial();
     dropMaterial.texture = 'materials/drop.png';
@@ -345,4 +361,40 @@ define("game", ["require", "exports"], function (require, exports) {
         }
     }
     engine.addEntity(house);
+    // ADD CLOUDS
+    var clouds = new Entity();
+    clouds.set(new Transform());
+    clouds.get(Transform).position.set(5, 10, 5);
+    clouds.get(Transform).scale.setAll(5);
+    function setClouds() {
+        var weather = weatherObject.get(CurrentWeather);
+        switch (weather.weather) {
+            case Weather.storm:
+                clouds.set(new GLTFShape("models/dark-cloud.gltf"));
+                break;
+            case Weather.snow:
+                clouds.set(new GLTFShape("models/dark-cloud.gltf"));
+                break;
+            case Weather.heavyRain:
+                clouds.set(new GLTFShape("models/dark-cloud.gltf"));
+                break;
+            case Weather.rain:
+                clouds.set(new GLTFShape("models/clouds.gltf"));
+                break;
+            case Weather.clouds:
+                clouds.set(new GLTFShape("models/clouds.gltf"));
+                break;
+            case Weather.sun:
+                clouds.remove(GLTFShape);
+                break;
+        }
+    }
+    engine.addEntity(clouds);
+    // DEFINE LIGHTNING COMPONENTS - ONE FOR EACH MODEL
+    var lightningModels = [];
+    for (var i = 1; i < 6; i++) {
+        var modelPath = "models/ln" + i + ".gltf";
+        var lnModel = new GLTFShape(modelPath);
+        lightningModels.push(lnModel);
+    }
 });

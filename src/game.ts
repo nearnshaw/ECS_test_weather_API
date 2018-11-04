@@ -1,11 +1,20 @@
 //// VALUES TO CONFIGURE ////////
 
+
+// TRY THE FOLLOWING VALUES
+// `snow`
+// `heavy rain`
+// `light rain`
+// `thunder`
+// `cloudy`
+let fakeWeather: string | null = 'thunder'
+
+
+
 const appId: string = 'bb6063b3'
 const APIkey: string = '2e55a43d3e62d76f145f28aa7e3990e9'
 const lat: string = '-34.55'
 const lon: string = '-58.46'
-
-let fakeWeather: string | null = 'snow'
 
 const rainSpeed = 4
 const snowSpeed = 1
@@ -205,6 +214,11 @@ export class RotateSystem {
   }
 }
 
+export class LightningSystem {
+  update() {
+   
+  }
+}
 
 const weatherObject = new Entity()
 weatherObject.set(new CurrentWeather())
@@ -227,6 +241,7 @@ makeItRain.set(
   new OnClick(_ => {
     getWeather()
     setHouse()
+    setClouds()
     log('clicked')
   })
 )
@@ -270,6 +285,7 @@ function spawnSnow() {
 engine.addSystem(new FallSystem())
 engine.addSystem(new RotateSystem())
 engine.addSystem(new SpawnSystem())
+engine.addSystem(new LightningSystem())
 
 
 // DEFINE MATERIALS
@@ -313,3 +329,47 @@ function setHouse(){
 }
 
 engine.addEntity(house)
+
+
+// ADD CLOUDS
+
+const clouds = new Entity()
+clouds.set(new Transform())
+clouds.get(Transform).position.set(5, 10, 5)
+clouds.get(Transform).scale.setAll(5)
+
+function setClouds(){
+  let weather = weatherObject.get(CurrentWeather)
+  switch (weather.weather) {
+    case Weather.storm:
+      clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      break
+    case Weather.snow:
+      clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      break
+    case Weather.heavyRain:
+      clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      break
+    case Weather.rain:
+      clouds.set(new GLTFShape("models/clouds.gltf" ))
+      break
+    case Weather.clouds:
+      clouds.set(new GLTFShape("models/clouds.gltf" ))
+      break
+    case Weather.sun:
+      clouds.remove(GLTFShape)
+      break
+  }
+}
+
+engine.addEntity(clouds)
+
+// DEFINE LIGHTNING COMPONENTS - ONE FOR EACH MODEL
+
+const lightningModels: GLTFShape[] = []
+for (let i = 1; i < 6; i ++)
+{
+  const modelPath =  "models/ln" + i + ".gltf"
+  const lnModel = new GLTFShape(modelPath)
+  lightningModels.push(lnModel)
+}
