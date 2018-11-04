@@ -3,9 +3,9 @@
 // fakeWeather CONTROLS WHAT WEATHER CONDITION TO SHOW IN THE SCENE
 // TRY THE FOLLOWING VALUES:
 // `snow`
+// `thunder`
 // `heavy rain`
 // `light rain`
-// `thunder`
 // `cloudy`
 let fakeWeather: string | null = 'snow'
 
@@ -242,23 +242,25 @@ export class RotateSystem {
 
 export class LightningSystem {
   update() {
-    let timer = lightning.get(LightningTimer)
-    timer.count -= 1
-    //log("timer " + timer.count)
-    if (timer.count < 0)
-    {
-      let lightningNum: number = Math.floor(Math.random() * 25) + 1
-      if (lightningNum > 6) {
-        if (lightning.has(GLTFShape)){
-          lightning.remove(GLTFShape)
-          timer.count = Math.random() * 20
-          return
-        }      
+    if (weatherObject.has(LightningTimer)){
+      let timer = weatherObject.get(LightningTimer)
+      timer.count -= 1
+      //log("timer " + timer.count)
+      if (timer.count < 0)
+      {
+        let lightningNum: number = Math.floor(Math.random() * 25) + 1
+        if (lightningNum > 6) {
+          if (lightning.has(GLTFShape)){
+            lightning.remove(GLTFShape)
+            timer.count = Math.random() * 20
+            return
+          }      
+        }
+        
+        lightning.set(lightningModels[lightningNum])
+        timer.count = Math.random() * 10
+        
       }
-      
-      lightning.set(lightningModels[lightningNum])
-      timer.count = Math.random() * 10
-      
     }
   }
 }
@@ -397,21 +399,27 @@ function setClouds(){
   switch (weather.weather) {
     case Weather.storm:
       clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      weatherObject.set(new LightningTimer(30))
       break
     case Weather.snow:
       clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      weatherObject.remove(LightningTimer)
       break
     case Weather.heavyRain:
       clouds.set(new GLTFShape("models/dark-cloud.gltf" ))
+      weatherObject.remove(LightningTimer)
       break
     case Weather.rain:
       clouds.set(new GLTFShape("models/clouds.gltf" ))
+      weatherObject.remove(LightningTimer)
       break
     case Weather.clouds:
       clouds.set(new GLTFShape("models/clouds.gltf" ))
+      weatherObject.remove(LightningTimer)
       break
     case Weather.sun:
       clouds.remove(GLTFShape)
+      weatherObject.remove(LightningTimer)
       break
   }
 }
@@ -431,7 +439,6 @@ const lightning = new Entity()
 lightning.set(new Transform())
 lightning.get(Transform).position.set(5, 10, 5)
 lightning.get(Transform).scale.setAll(5)
-lightning.set(new LightningTimer(30))
 engine.addEntity(lightning)
 
 // ADD SYSTEMS
