@@ -202,9 +202,10 @@ export class RotateSystem {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
       let rotation = flake.get(Transform).rotation
-      rotation.x =+ vel.x
-      rotation.y =+ vel.y
-      rotation.z =+ vel.z
+      rotation.add(vel)
+      //rotation.x =+ vel.x
+      //rotation.y =+ vel.y
+      //rotation.z =+ vel.z
     }
   }
 }
@@ -239,23 +240,12 @@ engine.addEntity(makeItRain)
 
 function spawnRain() {
   const drop = new Entity()
-  drop.set(new IsPrecip())
-  drop.get(IsPrecip).type = PrecipType.drop
+  drop.set(new IsPrecip(PrecipType.drop))
+  drop.set(new Transform())
+  drop.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1)
+  drop.get(Transform).scale.setAll(0.15)
 
-  let dropTransform = new Transform()
-  dropTransform.position.x = Math.random() * 8 + 1
-  dropTransform.position.y = 10
-  dropTransform.position.z = Math.random() * 8 + 1
-  dropTransform.scale.x = 0.15
-  dropTransform.scale.y = 0.15
-  dropTransform.scale.z = 0.15
-
-  drop.set(dropTransform)
- 
-  //drop.set(new PlaneShape())
-  const plane = new PlaneShape()
-  //plane.uvs = [0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1, 0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1]
-  drop.set(plane)
+  drop.set(new PlaneShape())
   drop.set(dropMaterial)
   
   engine.addEntity(drop)
@@ -264,39 +254,24 @@ function spawnRain() {
 
 function spawnSnow() {
   const flake = new Entity()
-  flake.set(new IsPrecip())
-  flake.get(IsPrecip).type = PrecipType.flake
+  flake.set(new IsPrecip(PrecipType.flake))
 
-  let flakeTransform = new Transform()
-  flakeTransform.position.x = Math.random() * 8 + 1
-  flakeTransform.position.y = 10
-  flakeTransform.position.z = Math.random() * 8 + 1
-
-  flakeTransform.rotation.x = Math.random() * 180
-  flakeTransform.rotation.y = Math.random() * 180
-  flakeTransform.rotation.z = Math.random() * 180
-
-  flakeTransform.scale.x = 0.3
-  flakeTransform.scale.y = 0.3
-  flakeTransform.scale.z = 0.3
-
-  flake.set(flakeTransform)
+  flake.set(new Transform())
+  flake.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1)
+  flake.get(Transform).rotation.set(Math.random() * 180, Math.random() * 180, Math.random() * 180)
+  flake.get(Transform).scale.setAll(0.3)
 
   //flake.set(new PlaneShape())
   flake.set(new SpinVel())
-  flake.get(SpinVel).velocityX = Math.random() * 10
-  flake.get(SpinVel).velocityY = Math.random() * 10
-  flake.get(SpinVel).velocityZ = Math.random() * 10
+  flake.get(SpinVel).vel.x = Math.random() * 10
+  flake.get(SpinVel).vel.y = Math.random() * 10
+  flake.get(SpinVel).vel.z = Math.random() * 10
 
-  const plane = new PlaneShape()
-  plane.uvs = [0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1, 0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1]
-  flake.set(plane)
+  flake.set(new PlaneShape())
+  flake.get(PlaneShape).uvs = [0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1, 0, 0.75, 0.25, 0.75, 0.25, 1, 0, 1]
 
   let materialIndex = Math.floor(Math.random() * 15)
-
-
   flake.set(flakeMaterial[materialIndex])
-
 
   engine.addEntity(flake)
 }
@@ -323,8 +298,9 @@ for (let i = 0; i < 15; i ++)
 // ADD HOUSE
 
 const house = new Entity()
-const houseGLTF = new GLTFShape('models/house_dry.gltf')
-house.set(houseGLTF)
+house.set(new Transform())
+house.get(Transform).position.set(5, 0, 5)
+house.set(new GLTFShape('models/house_dry.gltf'))
 
 function setHouse(){
   let weather = weatherObject.get(CurrentWeather)
@@ -343,10 +319,5 @@ function setHouse(){
       break
   }
 }
-
-
-house.set(new Transform())
-house.get(Transform).position.set(5, 0, 5)
-
 
 engine.addEntity(house)
