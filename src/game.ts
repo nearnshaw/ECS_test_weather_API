@@ -71,7 +71,7 @@ export class SpinVel{
 }
 
 const drops = engine.getComponentGroup(Transform, IsPrecip)
-const flakes = engine.getComponentGroup(Transform, SpinVel)
+const flakes = engine.getComponentGroup(Transform, IsPrecip, SpinVel)
 
 // API calls not supported for now, here we're only using `fakeWeather`
 function getWeather() {
@@ -197,8 +197,7 @@ export class FallSystem {
 
 
 export class RotateSystem {
-
-  update(dt: number) {
+  update() {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
       flake.get(Transform).rotation.add(vel)
@@ -257,11 +256,8 @@ function spawnSnow() {
   flake.get(Transform).rotation.set(Math.random() * 180, Math.random() * 180, Math.random() * 180)
   flake.get(Transform).scale.setAll(0.3)
 
-  //flake.set(new PlaneShape())
-  flake.set(new SpinVel())
-  flake.get(SpinVel).vel.x = Math.random() * 30
-  flake.get(SpinVel).vel.y = Math.random() * 30
-  flake.get(SpinVel).vel.z = Math.random() * 30
+  const flakeSpin = new Vector3(Math.random() * 30, Math.random() * 30, Math.random() * 30)
+  flake.set(new SpinVel(flakeSpin))
 
   flake.set(new PlaneShape())
  
@@ -282,7 +278,7 @@ dropMaterial.texture = 'materials/drop.png'
 dropMaterial.samplingMode = 0
 
 const flakeMaterial: BasicMaterial[] = []
-for (let i = 0; i < 15; i ++)
+for (let i = 1; i < 15; i ++)
 {
   let material = new BasicMaterial()
   material.texture =  "materials/flake" + i + ".png"

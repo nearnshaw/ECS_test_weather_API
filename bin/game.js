@@ -246,7 +246,7 @@ define("game", ["require", "exports"], function (require, exports) {
     var RotateSystem = /** @class */ (function () {
         function RotateSystem() {
         }
-        RotateSystem.prototype.update = function (dt) {
+        RotateSystem.prototype.update = function () {
             var e_2, _a;
             try {
                 for (var _b = __values(flakes.entities), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -301,11 +301,8 @@ define("game", ["require", "exports"], function (require, exports) {
         flake.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1);
         flake.get(Transform).rotation.set(Math.random() * 180, Math.random() * 180, Math.random() * 180);
         flake.get(Transform).scale.setAll(0.3);
-        //flake.set(new PlaneShape())
-        flake.set(new SpinVel());
-        flake.get(SpinVel).vel.x = Math.random() * 30;
-        flake.get(SpinVel).vel.y = Math.random() * 30;
-        flake.get(SpinVel).vel.z = Math.random() * 30;
+        var flakeSpin = new Vector3(Math.random() * 30, Math.random() * 30, Math.random() * 30);
+        flake.set(new SpinVel(flakeSpin));
         flake.set(new PlaneShape());
         var materialIndex = Math.floor(Math.random() * 15);
         flake.set(flakeMaterial[materialIndex]);
@@ -319,7 +316,7 @@ define("game", ["require", "exports"], function (require, exports) {
     dropMaterial.texture = 'materials/drop.png';
     dropMaterial.samplingMode = 0;
     var flakeMaterial = [];
-    for (var i = 0; i < 15; i++) {
+    for (var i = 1; i < 15; i++) {
         var material = new BasicMaterial();
         material.texture = "materials/flake" + i + ".png";
         material.samplingMode = 0;
