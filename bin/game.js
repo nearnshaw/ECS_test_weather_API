@@ -26,13 +26,16 @@ var __values = (this && this.__values) || function (o) {
 define("game", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    // TRY THE FOLLOWING VALUES
+    // fakeWeather CONTROLS WHAT WEATHER CONDITION TO SHOW IN THE SCENE
+    // TRY THE FOLLOWING VALUES:
     // `snow`
     // `heavy rain`
     // `light rain`
     // `thunder`
     // `cloudy`
-    var fakeWeather = 'thunder';
+    var fakeWeather = 'snow';
+    //////////////////////////////
+    // THESE VALUES WILL BE USEFUL WHEN HITTING THE WEATHER API (NOT CURRENTLY SUPPORTED)
     var appId = 'bb6063b3';
     var APIkey = '2e55a43d3e62d76f145f28aa7e3990e9';
     var lat = '-34.55';
@@ -207,6 +210,8 @@ define("game", ["require", "exports"], function (require, exports) {
                 break;
         }
     }
+    ///////////////////
+    // SYSTEMS (EXECUTE update() ON EACH FRAME)
     var SpawnSystem = /** @class */ (function () {
         function SpawnSystem() {
         }
@@ -271,13 +276,16 @@ define("game", ["require", "exports"], function (require, exports) {
     var RotateSystem = /** @class */ (function () {
         function RotateSystem() {
         }
-        RotateSystem.prototype.update = function () {
+        RotateSystem.prototype.update = function (dt) {
             var e_2, _a;
             try {
                 for (var _b = __values(flakes.entities), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var flake = _c.value;
                     var vel = flake.get(SpinVel).vel;
-                    flake.get(Transform).rotation.add(vel);
+                    //flake.get(Transform).rotation.add(vel)
+                    flake.get(Transform).rotation.x += vel.x * dt;
+                    flake.get(Transform).rotation.y += vel.y * dt;
+                    flake.get(Transform).rotation.z += vel.z * dt;
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -314,9 +322,39 @@ define("game", ["require", "exports"], function (require, exports) {
         return LightningSystem;
     }());
     exports.LightningSystem = LightningSystem;
+    /////////////////
+    // CREATE NEW RAINDROPS
+    function spawnRain() {
+        var drop = new Entity();
+        drop.set(new IsPrecip(PrecipType.drop));
+        drop.set(new Transform());
+        drop.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1);
+        drop.get(Transform).scale.setAll(0.15);
+        drop.set(new PlaneShape());
+        drop.set(dropMaterial);
+        engine.addEntity(drop);
+    }
+    // CREATE NEW SNOWFLAKES
+    function spawnSnow() {
+        var flake = new Entity();
+        flake.set(new IsPrecip(PrecipType.flake));
+        flake.set(new Transform());
+        flake.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1);
+        flake.get(Transform).rotation.set(Math.random() * 180, Math.random() * 180, Math.random() * 180);
+        flake.get(Transform).scale.setAll(0.3);
+        var flakeSpin = new Vector3(Math.random() * 30, Math.random() * 30, Math.random() * 30);
+        flake.set(new SpinVel(flakeSpin));
+        flake.set(new PlaneShape());
+        var materialIndex = Math.floor(Math.random() * 15);
+        flake.set(flakeMaterial[materialIndex]);
+        engine.addEntity(flake);
+    }
+    // SCENE FIXED ENTITIES
+    // WEATHER CONTROLLER SINGLETON 
     var weatherObject = new Entity();
     weatherObject.set(new CurrentWeather());
     engine.addEntity(weatherObject);
+    // BUTTON TO TRIGGER WEATHER
     var buttonMaterial = new Material();
     buttonMaterial.albedoColor = '#FF0000';
     buttonMaterial.metallic = 0.9;
@@ -333,38 +371,11 @@ define("game", ["require", "exports"], function (require, exports) {
         log('clicked');
     }));
     engine.addEntity(makeItRain);
-    function spawnRain() {
-        var drop = new Entity();
-        drop.set(new IsPrecip(PrecipType.drop));
-        drop.set(new Transform());
-        drop.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1);
-        drop.get(Transform).scale.setAll(0.15);
-        drop.set(new PlaneShape());
-        drop.set(dropMaterial);
-        engine.addEntity(drop);
-    }
-    function spawnSnow() {
-        var flake = new Entity();
-        flake.set(new IsPrecip(PrecipType.flake));
-        flake.set(new Transform());
-        flake.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1);
-        flake.get(Transform).rotation.set(Math.random() * 180, Math.random() * 180, Math.random() * 180);
-        flake.get(Transform).scale.setAll(0.3);
-        var flakeSpin = new Vector3(Math.random() * 30, Math.random() * 30, Math.random() * 30);
-        flake.set(new SpinVel(flakeSpin));
-        flake.set(new PlaneShape());
-        var materialIndex = Math.floor(Math.random() * 15);
-        flake.set(flakeMaterial[materialIndex]);
-        engine.addEntity(flake);
-    }
-    engine.addSystem(new FallSystem());
-    engine.addSystem(new RotateSystem());
-    engine.addSystem(new SpawnSystem());
-    engine.addSystem(new LightningSystem());
-    // DEFINE MATERIALS
+    // DEFINE DROP MATERIALS
     var dropMaterial = new BasicMaterial();
     dropMaterial.texture = 'materials/drop.png';
     dropMaterial.samplingMode = 0;
+    // DEFINE FLAKE MATERIALS AS AN ARRAY OF BASICMATERIAL COMPONENTS
     var flakeMaterial = [];
     for (var i = 1; i < 15; i++) {
         var material = new BasicMaterial();
@@ -400,6 +411,7 @@ define("game", ["require", "exports"], function (require, exports) {
     clouds.set(new Transform());
     clouds.get(Transform).position.set(5, 10, 5);
     clouds.get(Transform).scale.setAll(5);
+    engine.addEntity(clouds);
     function setClouds() {
         var weather = weatherObject.get(CurrentWeather);
         switch (weather.weather) {
@@ -423,8 +435,7 @@ define("game", ["require", "exports"], function (require, exports) {
                 break;
         }
     }
-    engine.addEntity(clouds);
-    // DEFINE LIGHTNING COMPONENTS - ONE FOR EACH MODEL
+    // DEFINE LIGHTNING COMPONENTS AS AN ARRAY OF GLTF COMPONENTS
     var lightningModels = [];
     for (var i = 1; i < 6; i++) {
         var modelPath = "models/ln" + i + ".gltf";
@@ -438,4 +449,9 @@ define("game", ["require", "exports"], function (require, exports) {
     lightning.get(Transform).scale.setAll(5);
     lightning.set(new LightningTimer(30));
     engine.addEntity(lightning);
+    // ADD SYSTEMS
+    engine.addSystem(new FallSystem());
+    engine.addSystem(new RotateSystem());
+    engine.addSystem(new SpawnSystem());
+    engine.addSystem(new LightningSystem());
 });

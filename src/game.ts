@@ -7,7 +7,7 @@
 // `light rain`
 // `thunder`
 // `cloudy`
-let fakeWeather: string | null = 'thunder'
+let fakeWeather: string | null = 'snow'
 
 //////////////////////////////
 
@@ -229,10 +229,13 @@ export class FallSystem {
 
 
 export class RotateSystem {
-  update() {
+  update(dt: number) {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
-      flake.get(Transform).rotation.add(vel)
+      //flake.get(Transform).rotation.add(vel)
+      flake.get(Transform).rotation.x += vel.x * dt
+      flake.get(Transform).rotation.y += vel.y * dt
+      flake.get(Transform).rotation.z += vel.z * dt
     }
   }
 }
