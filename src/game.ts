@@ -7,7 +7,7 @@
 // `heavy rain`
 // `light rain`
 // `cloudy`
-let fakeWeather: string | null = 'snow'
+let fakeWeather: string | null = 'thunder'
 
 //////////////////////////////
 
@@ -276,8 +276,10 @@ function spawnRain() {
   drop.set(new Transform())
   drop.get(Transform).position.set(Math.random() * 8 + 1, 10, Math.random() * 8 + 1)
   drop.get(Transform).scale.setAll(0.15)
-
   drop.set(new PlaneShape())
+  // Make the plane rotate to always face you in the Y axis
+  drop.get(PlaneShape).billboard = 2
+  // Apply drop texture
   drop.set(dropMaterial)
   
   engine.addEntity(drop)
