@@ -311,7 +311,7 @@ export class RotateSystem implements ISystem {
   update(dt: number) {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
-      flake.get(Transform).rotate(vel * dt)
+      flake.get(Transform).rotate(vel.scale(dt))
     }
   }
 }

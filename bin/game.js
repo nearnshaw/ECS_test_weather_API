@@ -399,7 +399,7 @@ define("game", ["require", "exports"], function (require, exports) {
                 for (var _b = __values(flakes.entities), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var flake = _c.value;
                     var vel = flake.get(SpinVel).vel;
-                    flake.get(Transform).rotate(vel * dt);
+                    flake.get(Transform).rotate(vel.scale(dt));
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
