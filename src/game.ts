@@ -235,7 +235,7 @@ function spawnSnow() {
 // SYSTEMS (EXECUTE update() ON EACH FRAME)
 
 
-export class CheckWeather {
+export class CheckWeather implements ISystem  {
   update(dt: number) {
     let weather = weatherObject.get(CurrentWeather)
     weather.checkInterval -= 1
@@ -248,7 +248,7 @@ export class CheckWeather {
 }
 
 
-export class SpawnSystem {
+export class SpawnSystem implements ISystem  {
   update(dt: number) {
       const weather = weatherObject.get(CurrentWeather)
       if (weather.dropsToAdd > 1) {
@@ -273,7 +273,7 @@ export class SpawnSystem {
 }
 
 // For both raindrops and snowflakes
-export class FallSystem {
+export class FallSystem implements ISystem  {
   update(dt: number) {
     for (let drop of drops.entities) {
       let position = drop.get(Transform).position
@@ -296,7 +296,7 @@ export class FallSystem {
 }
 
 // For snowflakes
-export class RotateSystem {
+export class RotateSystem implements ISystem  {
   update(dt: number) {
     for (let flake of flakes.entities) {
       const vel = flake.get(SpinVel).vel
@@ -309,7 +309,7 @@ export class RotateSystem {
 }
 
 // For thunder
-export class LightningSystem {
+export class LightningSystem implements ISystem  {
   update() {
     if (weatherObject.has(LightningTimer)){
       let timer = weatherObject.get(LightningTimer)
