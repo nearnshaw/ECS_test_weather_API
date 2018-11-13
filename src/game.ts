@@ -7,7 +7,7 @@
 // `heavy rain`
 // `light rain`
 // `cloudy`
-let fakeWeather: string | null = "snow"
+let fakeWeather: string | null = null
 
 //////////////////////////////
 
@@ -95,9 +95,11 @@ export class IsPrecip {
 
 @Component('spinVel')
 export class SpinVel {
-  vel: Vector3
-  constructor(spinVel: Vector3 = Vector3.Zero()) {
-    this.vel = spinVel
+  dir: Vector3
+  vel: number
+  constructor(dir: Vector3 = Vector3.Zero(), vel: number = 1) {
+    this.dir = dir
+    this.vel = vel
   }
 }
 
@@ -236,7 +238,10 @@ function spawnSnow() {
     Math.random() * 30,
     Math.random() * 30
   )
-  flake.set(new SpinVel(flakeSpin))
+
+  const flakeSpeed = Math.random() * 2
+
+  flake.set(new SpinVel(flakeSpin, flakeSpeed))
 
   flake.set(new PlaneShape())
 
@@ -296,7 +301,6 @@ export class FallSystem implements ISystem {
       } else if (type == PrecipType.flake) {
         position.y = position.y - dt * snowSpeed
       }
-
       if (position.y < 0) {
         position.x = Math.random() * 8 + 1
         position.y = 10
@@ -310,11 +314,16 @@ export class FallSystem implements ISystem {
 export class RotateSystem implements ISystem {
   update(dt: number) {
     for (let flake of flakes.entities) {
+      const dir = flake.get(SpinVel).dir
       const vel = flake.get(SpinVel).vel
-      flake.get(Transform).rotate(vel.scale(dt))
+      flake.get(Transform).rotate(dir, vel)
     }
   }
 }
+
+let cam = Camera.instance
+
+cam.rotation.eulerAngles
 
 // For thunder
 export class LightningSystem implements ISystem {
