@@ -211,7 +211,7 @@ function spawnRain() {
   drop.get(Transform).scale.setAll(0.15)
   drop.set(new PlaneShape())
   // Make the plane rotate to always face you in the Y axis
-  drop.get(PlaneShape).billboard = 2
+  drop.get(PlaneShape).billboard = BillboardMode.BILLBOARDMODE_Y
   // Apply drop texture
   drop.set(dropMaterial)
 
